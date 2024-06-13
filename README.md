@@ -21,7 +21,7 @@ kubectl create secret generic etcd-credentials \
 
 2. Create a `ClusterIssuer` or `Issuer`
 
-```sh
+```yaml
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
