@@ -102,8 +102,6 @@ func (c *corednsProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	fmt.Println("config", cfg)
-
 	etcdClient, err := c.NewEtcdClient(cfg, ch)
 	if err != nil {
 		return err
