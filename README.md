@@ -2,13 +2,53 @@
   <img src="https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png" height="256" width="256" alt="cert-manager project logo" />
 </p>
 
-# CoreDNS ACME webhook
+# Cert-Manager webhook for CoreDNS
 
-```sh
-docker build -t cert-manager-webhook-coredns .
+Cert-Manager `dns01` webhook for CoreDNS using ETCD plugin.  
+See https://cert-manager.io/docs/configuration/acme/dns01/webhook/ for more information.
+
+
+## Usage
+
+1. You should have a secret containing your etcd credentials in the same namespace than etcd and CoreDNS
+
+```sh 
+kubectl create secret generic etcd-credentials \
+  --from-literal=etcd-username='ETCD-USERNAME' \
+  --from-literal=etcd-password='ETCD-PASSWORD' \
+  -n dns-system
 ```
 
-Choose a unique group name to identify your company or organization (for example `acme.mycompany.example`).
+2. Create a `ClusterIssuer` or `Issuer`
+
+```sh
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: nextheader-acme
+spec:
+  acme:
+    email: admin@nextheader.dev
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: nextheader-acme
+    solvers:
+    - dns01:
+        webhook:
+          groupName: acme.nextheader.dev
+          solverName: coredns-solver
+          config:
+            coreDNSPrefix: /skydns
+            etcdEndpoints: "http://[2a06:de00:50:1:ff00::11]:2379"
+            etcdUsernameRef:
+              name: etcd-credentials
+              key: etcd-username        
+            etcdPasswordRef: 
+              name: etcd-credentials
+              key: etcd-password
+```
+
+3. Finally, install the Cert-Manager webhook for CoreDNS. Choose a unique group name to identify your company or organization (for example `acme.mycompany.example`)
 
 ```sh
 helm upgrade --install \
@@ -37,14 +77,3 @@ $ TEST_ZONE_NAME=example.com. make test
 ```
 
 The example file has a number of areas you must fill in and replace with your own options in order for tests to pass.
-
-## Acknowledgments
-
-This work is based on: https://github.com/cert-manager/webhook-example. 
-
-Another open-source project https://github.com/ii/cert-manager-webhook-coredns-etcd licenced using Apache2 preceeds this work.
-This work is not per-se a fork of it but is inspired by it.
-
-Also, the more mature project [cert-manager-webhook-ovh](https://github.com/baarde/cert-manager-webhook-ovh/tree/main) served as an example.
-
-Finally, the ExternalDNS [CoreDNS](https://github.com/kubernetes-sigs/external-dns/blob/master/provider/coredns/coredns.go) plugin has been a great help for the realisation of this work.
