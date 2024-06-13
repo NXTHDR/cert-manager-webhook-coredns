@@ -1,0 +1,12 @@
+{
+    "coreDNSPrefix": "/skydns",
+    "etcdEndpoints": "http://[2a06:de00:50:1:ff00::11]:2379",
+    "etcdUsernameRef": {
+        "name": "etcd-credentials",
+        "key": "etcd-username"
+    },
+    "etcdPasswordRef": {
+        "name": "etcd-credentials",
+        "key": "etcd-password"
+    }
+}

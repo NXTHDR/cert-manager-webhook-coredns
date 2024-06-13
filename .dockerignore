@@ -1,0 +1,4 @@
+/.git
+/_out
+/cert-manager-webhook-coredns
+/testdata
