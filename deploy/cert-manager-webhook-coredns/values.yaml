@@ -13,8 +13,8 @@ certManager:
   serviceAccountName: cert-manager
 
 image:
-  repository: ttl.sh/cert-manager-webhook-coredns
-  tag: 1h
+  repository: ghcr.io/nxthdr/cert-manager-webhook-coredns
+  tag: main
   pullPolicy: Always
 
 nameOverride: ""

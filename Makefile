@@ -2,8 +2,8 @@ GO ?= $(shell which go)
 OS ?= $(shell $(GO) env GOOS)
 ARCH ?= $(shell $(GO) env GOARCH)
 
-IMAGE_NAME := "ttl.sh/cert-manager-webhook-coredns"
-IMAGE_TAG := "1h"
+IMAGE_NAME := "ghcr.io/nxthdr/cert-manager-webhook-coredns"
+IMAGE_TAG := "main"
 
 OUT := $(shell pwd)/_out
 
