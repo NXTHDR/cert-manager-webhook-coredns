@@ -10,16 +10,45 @@ See https://cert-manager.io/docs/configuration/acme/dns01/webhook/ for more info
 
 ## Usage
 
-1. You should have a secret containing your etcd credentials in the same namespace than etcd and CoreDNS
+1. Create a secret containing your etcd credentials in the same namespace than the webhook
 
 ```sh 
 kubectl create secret generic etcd-credentials \
   --from-literal=etcd-username='ETCD-USERNAME' \
   --from-literal=etcd-password='ETCD-PASSWORD' \
-  -n dns-system
+  -n cert-manager
 ```
 
-2. Create a `ClusterIssuer` or `Issuer`
+2. Create RBAC configuration to access secret
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-manager-webhook-coredns:secret-reader
+  namespace: cert-manager
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["etcd-credentials"]
+  verbs: ["get", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-manager-webhook-coredns:secret-reader
+  namespace: cert-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager-webhook-coredns:secret-reader
+subjects:
+- apiGroup: ""
+  kind: ServiceAccount
+  name: cert-manager-webhook-coredns
+```
+
+3. Create a `ClusterIssuer` or `Issuer`
 
 ```yaml
 apiVersion: cert-manager.io/v1
@@ -48,7 +77,7 @@ spec:
               key: etcd-password
 ```
 
-3. Finally, install the Cert-Manager webhook for CoreDNS. Choose a unique group name to identify your company or organization (for example `acme.mycompany.example`)
+4. Finally, install the Cert-Manager webhook for CoreDNS. Choose a unique group name to identify your company or organization (for example `acme.mycompany.example`). In this example it is installed in the `cert-manager` namespace.
 
 ```sh
 helm upgrade --install \
